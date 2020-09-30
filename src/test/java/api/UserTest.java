@@ -26,14 +26,14 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class UserTest {
+public class UserTest extends Login {
 
     CloseableHttpClient client;
     String baseUrl = "http://localhost:8080/api";
     String userUrl = "http://localhost:8080/api/user";
     String contactUrl = "http://localhost:8080/api/contact";
-    String email = "innysik@gmail.com";
-    String password = "11111111111";
+    String email = "test@mail.com";
+    String password = "12345678";
     String tempPass = "888888888";
     HttpPost postRequest;
     HttpResponse response;
@@ -48,25 +48,6 @@ public class UserTest {
     @Before
     public void init() {
         client = HttpClientBuilder.create().build();
-    }
-
-    private String getToken(String email, String password) throws IOException {
-        client = HttpClientBuilder.create().build();
-
-        postRequest = new HttpPost(userUrl + "/login");
-        postRequest.addHeader("Content-Type", "application/json");
-
-        String json = "{\"email\":\"" + email + "\"" + "," + "\"password\":\"" + password + "\"}";
-
-        postRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
-        response = client.execute(postRequest);
-
-        return response.getFirstHeader("Access-Token").getValue();
-    }
-
-    private void makeHeader (String email, String password, HttpRequest request) throws IOException {
-        request.addHeader("Content-Type", "application/json");
-        request.setHeader("access-token", getToken(email, password));
     }
 
     private void userAuthorization(String token) throws IOException {
@@ -103,9 +84,8 @@ public class UserTest {
         postRequest = new HttpPost(userUrl + "/login");
         postRequest.addHeader("Content-Type", "application/json");
 
-        String email = "innysik@gmail.com";
-        String password = "1111111111";
-        String json = "{\"email\":\"" + email + "\"" + "," + "\"password\":\"" + password + "\"}";
+        String wrongPass = "1111111111";
+        String json = "{\"email\":\"" + email + "\"" + "," + "\"password\":\"" + wrongPass + "\"}";
 
         postRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
         response = client.execute(postRequest);
