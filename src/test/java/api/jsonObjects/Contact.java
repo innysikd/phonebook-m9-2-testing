@@ -1,8 +1,9 @@
 package api.jsonObjects;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserProfile {
+public class Contact {
 
     int id;
     String firstName;
@@ -12,17 +13,44 @@ public class UserProfile {
     List<Address> addresses = new ArrayList<>();
     List<Email> emails = new ArrayList<>();
 
-    public UserProfile(int id, String firstName, String lastName, String description) {
+    public Contact(int id, String firstName, String lastName, String description) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.description = description;
     }
 
-    public UserProfile(String firstName, String lastName, String description) {
+    public Contact(String firstName, String lastName, String description) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.description = description;
+    }
+
+    public Contact(int id, String firstName, String lastName, String description, List<Phone> phoneNumbers) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.description = description;
+        this.phoneNumbers = phoneNumbers;
+    }
+
+    public Contact(int id, String firstName, String lastName, String description, List<Phone> phoneNumbers, List<Email> emails) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.description = description;
+        this.phoneNumbers = phoneNumbers;
+        this.emails = emails;
+    }
+
+    public Contact(int id, String firstName, String lastName, String description, List<Phone> phoneNumbers, List<Email> emails, List<Address> addresses) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.description = description;
+        this.phoneNumbers = phoneNumbers;
+        this.emails = emails;
+        this.addresses = addresses;
     }
 
     public int getId() {

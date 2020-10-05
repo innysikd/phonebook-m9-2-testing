@@ -1,11 +1,8 @@
 package api;
 
-import api.jsonObjects.Address;
-import api.jsonObjects.Phone;
 import api.jsonObjects.UserProfile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -26,23 +23,22 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class UserTest extends Login {
+public class UserTest extends Header {
 
     CloseableHttpClient client;
-    String baseUrl = "http://localhost:8080/api";
-    String userUrl = "http://localhost:8080/api/user";
-    String contactUrl = "http://localhost:8080/api/contact";
+    String baseUrl = "http://dev.phonebook-2.telran-edu.de/api";
+    String userUrl = "http://dev.phonebook-2.telran-edu.de/api/user";
+    String contactUrl = "http://dev.phonebook-2.telran-edu.de/api/contact";
     String email = "test@mail.com";
     String password = "12345678";
-    String tempPass = "888888888";
+    String tempPass = "helloWorld";
     HttpPost postRequest;
     HttpResponse response;
     HttpGet getRequest;
-    HttpDelete deleteRequest;
     HttpPut putRequest;
     ObjectMapper objectMapper = new ObjectMapper();
 
-    public UserTest() throws IOException {
+    public UserTest() {
     }
 
     @Before
@@ -76,21 +72,26 @@ public class UserTest extends Login {
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
-    @Test // user login : invalid user
-    public void test002_loginWrongPassword() throws IOException {
 
-        client = HttpClientBuilder.create().build();
-
+@Test // user login : valid user, email to upper case
+    public void test002_loginValidExistingUserUpperCase() throws IOException {
         postRequest = new HttpPost(userUrl + "/login");
         postRequest.addHeader("Content-Type", "application/json");
 
-        String wrongPass = "1111111111";
-        String json = "{\"email\":\"" + email + "\"" + "," + "\"password\":\"" + wrongPass + "\"}";
+        String email = "Test@mail.com";
+
+        String json = "{\"email\":\"" + email + "\"" + "," + "\"password\":\"" + password + "\"}";
 
         postRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
         response = client.execute(postRequest);
 
-        assertEquals(401, response.getStatusLine().getStatusCode());
+        String token = response.getFirstHeader("Access-Token").getValue();
+
+        assertEquals(200, response.getStatusLine().getStatusCode());
+
+        userAuthorization(token);
+
+        assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
     @Test
@@ -107,8 +108,25 @@ public class UserTest extends Login {
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
+    @Test // user login : invalid user, password to lower case
+    public void test004_loginWrongPassword() throws IOException {
+
+        client = HttpClientBuilder.create().build();
+
+        postRequest = new HttpPost(userUrl + "/login");
+        postRequest.addHeader("Content-Type", "application/json");
+
+        String wrongPass = "helloworld";
+        String json = "{\"email\":\"" + email + "\"" + "," + "\"password\":\"" + wrongPass + "\"}";
+
+        postRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
+        response = client.execute(postRequest);
+
+        assertEquals(401, response.getStatusLine().getStatusCode());
+    }
+
     @Test
-    public void test004_changeBackPassAuthUser() throws IOException {
+    public void test005_changeBackPassAuthUser() throws IOException {
         putRequest = new HttpPut(userUrl + "/password/auth");
         makeHeader(email, tempPass, putRequest);
 
@@ -121,7 +139,7 @@ public class UserTest extends Login {
     }
 
     @Test
-    public void test005_addUserProfile() throws IOException {
+    public void test006_addUserProfile() throws IOException {
         putRequest = new HttpPut(contactUrl + "/profile");
         makeHeader(email, password, putRequest);
 
@@ -136,7 +154,7 @@ public class UserTest extends Login {
     }
 
     @Test
-    public void test006_getUserProfile() throws IOException {
+    public void test007_getUserProfile() throws IOException {
         getRequest = new HttpGet(contactUrl + "/profile");
         makeHeader(email, password, getRequest);
 
