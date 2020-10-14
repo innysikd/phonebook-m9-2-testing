@@ -1,5 +1,8 @@
 package api;
 
+import com.jayway.restassured.response.Response;
+import static com.jayway.restassured.RestAssured.given;
+//import com.jayway.restassured.http.ContentType;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -10,17 +13,38 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.IOException;
 
+import static api.Constants.USER_URL;
+
 public class Header {
 
     CloseableHttpClient client;
-    String userUrl = "http://dev.phonebook-2.telran-edu.de/api/user";
     HttpPost post;
     HttpResponse response;
+
+//    public static String retrieveToken (String email, String password){
+//        String json = "{\"email\":\"" + email + "\"" + "," + "\"password\":\"" + password + "\"}";
+//
+//        String response =
+//                given()
+//                .contentType(com.jayway.restassured.http.ContentType.JSON)
+//                .header("Content-Type", "application/json")
+//                .body(json)
+//                .when()
+//                .post(USER_URL + "/login")
+//                .then()
+//                .statusCode(200)
+//                .extract()
+//                .response()
+//                .getHeaders()
+//                .getValue("Access-Token");
+//
+//        return response;
+//    }
 
     private String getToken(String email, String password) throws IOException {
         client = HttpClientBuilder.create().build();
 
-        post = new HttpPost(userUrl + "/login");
+        post = new HttpPost(USER_URL + "/login");
         post.addHeader("Content-Type", "application/json");
 
         String json = "{\"email\":\"" + email + "\"" + "," + "\"password\":\"" + password + "\"}";

@@ -2,6 +2,8 @@ package api;
 
 import api.jsonObjects.UserProfile;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.restassured.response.Response;
+import static com.jayway.restassured.RestAssured.given;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -14,29 +16,28 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import java.io.IOException;
 
+import static api.Constants.*;
 import static org.junit.Assert.assertEquals;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class UserTest extends Header {
+public class UserTest {
 
     CloseableHttpClient client;
-    String baseUrl = "http://dev.phonebook-2.telran-edu.de/api";
-    String userUrl = "http://dev.phonebook-2.telran-edu.de/api/user";
-    String contactUrl = "http://dev.phonebook-2.telran-edu.de/api/contact";
-    String email = "test@mail.com";
-    String password = "12345678";
     String tempPass = "helloWorld";
     HttpPost postRequest;
     HttpResponse response;
     HttpGet getRequest;
     HttpPut putRequest;
     ObjectMapper objectMapper = new ObjectMapper();
+    Header header = new Header();
+    private static String token;
 
     public UserTest() {
     }
@@ -46,8 +47,13 @@ public class UserTest extends Header {
         client = HttpClientBuilder.create().build();
     }
 
+//    @BeforeClass
+//    public static void init() {
+//        token = Header.retrieveToken(EMAIL_USER1, PASS_USER1);
+//    }
+
     private void userAuthorization(String token) throws IOException {
-        getRequest = new HttpGet(userUrl);
+        getRequest = new HttpGet(USER_URL);
         getRequest.setHeader("access-token", token);
 
         response = client.execute(getRequest);
@@ -55,10 +61,10 @@ public class UserTest extends Header {
 
     @Test // user login : valid user
     public void test001_loginValidExistingUser() throws IOException {
-        postRequest = new HttpPost(userUrl + "/login");
+        postRequest = new HttpPost(USER_URL + "/login");
         postRequest.addHeader("Content-Type", "application/json");
 
-        String json = "{\"email\":\"" + email + "\"" + "," + "\"password\":\"" + password + "\"}";
+        String json = "{\"email\":\"" + EMAIL_USER1 + "\"" + "," + "\"password\":\"" + PASS_USER1 + "\"}";
 
         postRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
         response = client.execute(postRequest);
@@ -75,12 +81,12 @@ public class UserTest extends Header {
 
 @Test // user login : valid user, email to upper case
     public void test002_loginValidExistingUserUpperCase() throws IOException {
-        postRequest = new HttpPost(userUrl + "/login");
+        postRequest = new HttpPost(USER_URL + "/login");
         postRequest.addHeader("Content-Type", "application/json");
 
         String email = "Test@mail.com";
 
-        String json = "{\"email\":\"" + email + "\"" + "," + "\"password\":\"" + password + "\"}";
+        String json = "{\"email\":\"" + email + "\"" + "," + "\"password\":\"" + PASS_USER1 + "\"}";
 
         postRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
         response = client.execute(postRequest);
@@ -96,8 +102,8 @@ public class UserTest extends Header {
 
     @Test
     public void test003_changePassAuthUser() throws IOException {
-        putRequest = new HttpPut(userUrl + "/password/auth");
-        makeHeader(email, password, putRequest);
+        putRequest = new HttpPut(USER_URL + "/password/auth");
+        header.makeHeader(EMAIL_USER1, PASS_USER1, putRequest);
 
         String json = "{\"password\":\"" + tempPass + "\"}";
 
@@ -113,11 +119,11 @@ public class UserTest extends Header {
 
         client = HttpClientBuilder.create().build();
 
-        postRequest = new HttpPost(userUrl + "/login");
+        postRequest = new HttpPost(USER_URL + "/login");
         postRequest.addHeader("Content-Type", "application/json");
 
         String wrongPass = "helloworld";
-        String json = "{\"email\":\"" + email + "\"" + "," + "\"password\":\"" + wrongPass + "\"}";
+        String json = "{\"email\":\"" + EMAIL_USER1 + "\"" + "," + "\"password\":\"" + wrongPass + "\"}";
 
         postRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
         response = client.execute(postRequest);
@@ -127,10 +133,10 @@ public class UserTest extends Header {
 
     @Test
     public void test005_changeBackPassAuthUser() throws IOException {
-        putRequest = new HttpPut(userUrl + "/password/auth");
-        makeHeader(email, tempPass, putRequest);
+        putRequest = new HttpPut(USER_URL + "/password/auth");
+        header.makeHeader(EMAIL_USER1, tempPass, putRequest);
 
-        String json = "{\"password\":\"" + password + "\"}";
+        String json = "{\"password\":\"" + PASS_USER1 + "\"}";
 
         putRequest.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
         response = client.execute(putRequest);
@@ -140,8 +146,8 @@ public class UserTest extends Header {
 
     @Test
     public void test006_addUserProfile() throws IOException {
-        putRequest = new HttpPut(contactUrl + "/profile");
-        makeHeader(email, password, putRequest);
+        putRequest = new HttpPut(CONTACT_URL + "/profile");
+        header.makeHeader(EMAIL_USER1, PASS_USER1, putRequest);
 
         UserProfile profile = new UserProfile("Inna", "Drukerman", "Some description");
         String profileJson = objectMapper.writeValueAsString(profile);
@@ -155,8 +161,8 @@ public class UserTest extends Header {
 
     @Test
     public void test007_getUserProfile() throws IOException {
-        getRequest = new HttpGet(contactUrl + "/profile");
-        makeHeader(email, password, getRequest);
+        getRequest = new HttpGet(CONTACT_URL + "/profile");
+        header.makeHeader(EMAIL_USER1, PASS_USER1, getRequest);
 
         response = client.execute(getRequest);
         assertEquals(200, response.getStatusLine().getStatusCode());
